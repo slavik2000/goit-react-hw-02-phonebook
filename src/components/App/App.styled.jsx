@@ -8,7 +8,7 @@ export const Container = styled.div`
 
 export const Wrapper = styled.div`
   text-align: center;
-  font-size: 20px;
+  font-size: 18px;
 `;
 
 export const Title = styled.h1`
