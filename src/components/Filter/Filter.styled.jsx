@@ -1,18 +1,19 @@
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
-export const Div = styled.div`
-  margin-bottom: 15px;
+export const StyledLabel = styled.label`
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 `;
 
-export const Label = styled.label`
-  color: #000;
-  font-size: 20px;
-`;
-
-export const Input = styled.input`
-  width: 400px;
-  padding: 10px;
-  margin: 0 auto;
-  border-radius: 4px;
-  border: 3px solid #f08080;
+export const StyledInput = styled.input`
+  width: 300px;
+  height: 40px;
+  font-size: 16px;
+  border-radius: ${({ theme }) => {
+    return theme.inputBorderRadius;
+  }};
+  border: ${({ theme }) => {
+    return theme.buttonBorder;
+  }};
 `;

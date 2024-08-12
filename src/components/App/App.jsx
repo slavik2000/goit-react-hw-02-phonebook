@@ -1,9 +1,16 @@
 import React, { Component } from 'react';
 import { nanoid } from 'nanoid';
-import { Container, Title, SubTitle, Wrapper } from './App.styled';
-import ContactForm from '../ContactForm/ContactForm';
-import ContactList from '../ContactList/ContactList';
-import Filter from '../Filter/Filter';
+import ContactForm from 'components/ContactForm';
+import Filter from 'components/Filter';
+import ContactList from 'components/ContactList';
+import {
+  Container,
+  Section,
+  SectionsContainer,
+  Title,
+  SectionTitle,
+  Message,
+} from './App.styled';
 
 class App extends Component {
   state = {
@@ -16,72 +23,96 @@ class App extends Component {
     filter: '',
   };
 
-  // Добавление нового контакта в список контактов
-  addContact = contact => {
-    const isInContacts = this.state.contacts.some(
-      ({ name }) => name.toLowerCase() === contact.name.toLowerCase()
-    );
 
-    if (isInContacts) {
-      alert(`${contact.name} is already in contacts`);
-      return;
+
+
+
+
+
+
+  addContact = ({ name, number }) => {
+    const contact = { id: nanoid(), name, number };
+    const normalizedName = name.toLowerCase();
+
+    if (
+      this.state.contacts.find(
+        contact => contact.name.toLowerCase() === normalizedName
+      )
+    ) {
+      return alert(`${name} is already in contacts!`);
     }
+
     this.setState(prevState => ({
-      contacts: [{ id: nanoid(), ...contact }, ...prevState.contacts],
+      contacts: [contact, ...prevState.contacts],
     }));
   };
 
-  // Изменение значения фильтра
-  changeFilter = event => {
-    this.setState({ filter: event.target.value });
+  deleteContact = contactId => {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== contactId),
+    }));
   };
 
-  // Получение отфильтрованных контактов
-  getVisibleContacts = () => {
+  filterContacts = event => {
+    this.setState({ filter: event.currentTarget.value });
+  };
+
+  getFilteredContacts = () => {
     const { filter, contacts } = this.state;
     const normalizedFilter = filter.toLowerCase();
-
     return contacts.filter(contact =>
       contact.name.toLowerCase().includes(normalizedFilter)
     );
   };
 
-  // Удаление контакта из списка
-  removeContact = contactId => {
-    this.setState(prevState => {
-      return {
-        contacts: prevState.contacts.filter(({ id }) => id !== contactId),
-      };
-    });
-  };
+
+
+
+  
 
   render() {
-    const visibleContacts = this.getVisibleContacts();
-    const { filter } = this.state;
+    const filteredContacts = this.getFilteredContacts();
+    const { addContact, filterContacts, deleteContact, state } = this;
 
     return (
       <Container>
         <Title>Phonebook</Title>
-
-        <ContactForm onSubmit={this.addContact} />
-
-        <SubTitle>Contacts</SubTitle>
-        {this.state.contacts.length > 0 ? (
-          // Фильтр для отображения контактов
-          <Filter value={filter} onChangeFilter={this.changeFilter} />
-        ) : (
-          <Wrapper>Your phonebook is empty. Add first contact!</Wrapper>
-        )}
-        {this.state.contacts.length > 0 && (
-          // Список контактов
-          <ContactList
-            contacts={visibleContacts}
-            onRemoveContact={this.removeContact}
-          />
-        )}
+        <SectionsContainer>
+          <Section>
+            <SectionTitle>Add contact</SectionTitle>
+            <ContactForm onSubmit={addContact} />
+          </Section>
+          <Section className="contacts">
+            <SectionTitle>Contacts</SectionTitle>
+            {state.contacts.length !== 0 ? (
+              <>
+                <Filter value={state.filter} onChange={filterContacts} />
+                <ContactList
+                  contacts={filteredContacts}
+                  onDeleteButton={deleteContact}
+                />
+              </>
+            ) : (
+              <Message message="There are no contacts in your phonebook. Please add your first contact!" > There are no contacts in your phonebook. Please add your first contact!</Message>
+            )}
+          </Section>
+        </SectionsContainer>
       </Container>
     );
   }
 }
 
 export default App;
+
+
+// import { MessageText } from './Message.styled';
+
+// function Message({ message }) {
+//   return <>{message && <MessageText>{message}</MessageText>}</>;
+// }
+
+// Message.propTypes = {
+//   message: PropTypes.string.isRequired,
+// };
+
+// export default Message;

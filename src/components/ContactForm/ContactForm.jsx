@@ -1,72 +1,89 @@
 import React from 'react';
-import { nanoid } from 'nanoid';
-import { Form, Label, Button, Input } from './ContactForm.styled';
+import PropTypes from 'prop-types';
+import { Formik, ErrorMessage } from 'formik';
+import { object, string } from 'yup';
+import {
+  StyledLabel,
+  StyledForm,
+  StyledInput,
+  StyledButton,
 
-class ContactForm extends React.Component {
-  state = {
-    name: '',
-    number: '',
-  };
+} from './ContactForm.styled';
 
-  // Генерация уникальных идентификаторов для полей формы
-  nameInputId = nanoid();
-  numberInputId = nanoid();
+const initialValues = { name: '', number: '' };
 
-  // Обработка отправки формы
-  handleSubmit = event => {
-    event.preventDefault();
+const nameRegex = /^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/;
 
-    // Вызов функции onSubmit из родительского компонента с передачей объекта контакта
-    this.props.onSubmit({ name: this.state.name, number: this.state.number });
+const numberRegex =
+  /\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}/;
 
-    // Сброс состояния формы
-    this.reset();
-  };
+const schema = object().shape({
+  name: string()
+    .max(20)
+    .matches(nameRegex, {
+      message:
+        "Invalid name. Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan.",
+    })
+    .required(),
+  number: string()
+    .min(3)
+    .matches(numberRegex, {
+      message:
+        'Invalid number. Phone number must be digits and can contain spaces, dashes, parentheses and can start with +.',
+    })
+    .required(),
+});
 
-  // Обработка изменения значений полей формы
-  handleChange = event => {
-    const { name, value } = event.target;
-    this.setState({ [name]: value });
-  };
-
-  // Сброс состояния формы
-  reset = () => {
-    this.setState({ number: '', name: '' });
-  };
-
-  render() {
-    return (
-      <Form onSubmit={this.handleSubmit}>
-        <Label htmlFor={this.nameInputId}>
-          Name
-          <Input
-            type="text"
-            name="name"
-            value={this.state.name}
-            onChange={this.handleChange}
-            pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-            title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-            required
-          />
-        </Label>
-
-        <Label htmlFor={this.numberInputId}>
-          Number
-          <Input
-            type="tel"
-            name="number"
-            value={this.state.number}
-            onChange={this.handleChange}
-            pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-            title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
-            required
-          />
-        </Label>
-
-        <Button type="submit">Add contact </Button>
-      </Form>
-    );
+function ContactForm({ onSubmit }) {
+  function handleSubmit(values, { resetForm }) {
+    onSubmit(values);
+    resetForm();
   }
+
+
+
+
+
+  return (
+    <Formik
+      initialValues={initialValues}
+      validationSchema={schema}
+      onSubmit={handleSubmit}
+    >
+      <StyledForm>
+        <StyledLabel>
+          Name
+          <StyledInput
+            name="name"
+            type="text"
+            placeholder="Enter a contact name"
+          />
+          <ErrorMessage name="name">{msg => <div>{msg}</div>}</ErrorMessage>
+        </StyledLabel>
+        <StyledLabel>
+          Number
+          <StyledInput
+            name="number"
+            type="tel"
+            placeholder="Enter a contact number"
+          />
+          <ErrorMessage name="number">
+            {msg => <div className="message">{msg}</div>}
+          </ErrorMessage>
+
+        </StyledLabel>
+        <StyledButton type="submit">Add contact</StyledButton>
+      </StyledForm>
+    </Formik>
+  );
 }
 
+ContactForm.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};
 export default ContactForm;
+
+
+
+
+
